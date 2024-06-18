@@ -16,7 +16,7 @@ func New() *Server {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/v1/calculate", handlers.AddExpression)
-	mux.HandleFunc("/api/v1/expressions", handlers.GetExpression)
+	mux.HandleFunc("/api/v1/expressions", handlers.GetExpressions)
 
 	return &Server{
 		Server: &http.Server{
