@@ -44,3 +44,16 @@ func AddExpression(w http.ResponseWriter, r *http.Request) {
 
 	storage.DB.Expressions = append(storage.DB.Expressions, exp)
 }
+
+func GetExpressions(w http.ResponseWriter, r *http.Request) {
+	data, err := json.Marshal(storage.DB)
+	if err != nil {
+		http.Error(w, "something went wrong... (stringifying storage)", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(data)
+}
