@@ -7,8 +7,10 @@ import (
 )
 
 type Expression struct {
-	ID  int    `json:"id"`
-	Raw string `json:"expression"`
+	ID     int    `json:"id"`
+	Result int    `json:"result"`
+	Status string `json:"status"`
+	Raw    string `json:"expression"`
 }
 
 func (e *Expression) RemoveSpaces() *Expression {
