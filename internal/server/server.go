@@ -1,6 +1,10 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/Aspikk/Distributed-Calculator/internal/handlers"
+)
 
 type Server struct {
 	Server *http.Server
@@ -8,6 +12,8 @@ type Server struct {
 
 func New() *Server {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/api/v1/calculate", handlers.AddExpression)
 
 	return &Server{
 		Server: &http.Server{
