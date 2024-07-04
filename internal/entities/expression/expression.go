@@ -30,6 +30,14 @@ func (e *Expression) SetID(id *int) {
 	*id = *id + 1
 }
 
+func (e *Expression) SetStatus(status string) {
+	e.Status = status
+}
+
+func (e *Expression) AddTo(storage *[]*Expression) {
+	*storage = append(*storage, e)
+}
+
 func (e *Expression) IsInvalid() bool {
 	if e.Raw == "" {
 		return true
