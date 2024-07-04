@@ -7,12 +7,24 @@ import (
 	stack "github.com/Aspikk/Distributed-Calculator/internal/entities/stack"
 )
 
+var (
+	id = 1
+)
+
 type Expression struct {
-	ID     int    `json:"id"`
-	Result int    `json:"result"`
-	Status string `json:"status"`
-	Raw    string `json:"expression"`
-	rpn    string // Reverse Polish Notation
+	ID     int     `json:"id"`
+	Result float64 `json:"result"`
+	Status string  `json:"status"`
+	Raw    string  `json:"expression"`
+	rpn    string  // Reverse Polish Notation
+}
+
+func New() *Expression {
+	return &Expression{
+		ID:     id,
+		Result: 0,
+		Status: "new",
+	}
 }
 
 // Methods
@@ -46,11 +58,6 @@ func (e *Expression) AddSpaces() {
 	e.Raw = strings.Trim(e.Raw, " ")
 }
 
-func (e *Expression) SetID(id *int) {
-	e.ID = *id
-	*id = *id + 1
-}
-
 func (e *Expression) SetStatus(status string) {
 	e.Status = status
 }
@@ -76,16 +83,16 @@ func (e *Expression) IsInvalid() bool {
 			continue
 		}
 
-		if !(unicode.IsDigit(rune(v)) || v == '+' || v == '-' || v == '*' || v == '/' || v == '(' || v == ')' || v == '^') {
+		if !(isStringDigit(string(v)) || isOperation(v) || v == '(' || v == ')') {
 			return true
 		}
 
-		if v == '+' || v == '*' || v == '/' || v == '^' || v == '-' {
+		if isOperation(v) {
 			if i == 0 {
 				return true
 			}
 
-			if (i > 0) && (e.Raw[i-1] == '(' || e.Raw[i-1] == '+' || e.Raw[i-1] == '-' || e.Raw[i-1] == '*' || e.Raw[i-1] == '/' || e.Raw[i-1] == '^') {
+			if (i > 0) && (e.Raw[i-1] == '(' || isOperation(rune(e.Raw[i-1]))) {
 				return true
 			}
 
@@ -93,10 +100,22 @@ func (e *Expression) IsInvalid() bool {
 		}
 
 		if v == '(' {
+			if i >= 2 && (!isOperation(rune(e.Raw[i-2])) && e.Raw[i-2] != '(') {
+				return true
+			}
+			if i+2 < len(e.Raw) && isOperation(rune(e.Raw[i+2])) {
+				return true
+			}
 			stack.Push(v)
 		}
 
 		if v == ')' {
+			if !isStringDigit(string(e.Raw[i-2])) {
+				return true
+			}
+			if i+2 < len(e.Raw) && isStringDigit(string(e.Raw[i+2])) {
+				return true
+			}
 			_, ok := stack.Pop()
 			if !ok {
 				return true
@@ -105,7 +124,7 @@ func (e *Expression) IsInvalid() bool {
 	}
 
 	lastChar := e.Raw[len(e.Raw)-1]
-	if lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/' || lastChar == '^' {
+	if isOperation(rune(lastChar)) {
 		return true
 	}
 
@@ -113,7 +132,13 @@ func (e *Expression) IsInvalid() bool {
 		return true
 	}
 
-	return !stack.IsEmpty()
+	if !stack.IsEmpty() {
+		return true
+	}
+
+	id++
+
+	return false
 }
 
 func (e *Expression) ToRpn() {
@@ -196,4 +221,8 @@ func isStringDigit(s string) bool {
 		}
 	}
 	return true
+}
+
+func isOperation(v rune) bool {
+	return v == '+' || v == '-' || v == '*' || v == '/' || v == '^'
 }
