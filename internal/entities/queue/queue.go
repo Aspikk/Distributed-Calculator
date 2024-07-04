@@ -10,7 +10,7 @@ type Queue[T any] struct {
 	tail *node[T]
 }
 
-func NewQueue[T any]() *Queue[T] {
+func New[T any]() *Queue[T] {
 	return &Queue[T]{
 		head: nil,
 		tail: nil,
@@ -32,14 +32,14 @@ func (q *Queue[T]) Enqueue(value T) {
 	q.tail = new
 }
 
-func (q *Queue[T]) Dequeue() (bool, T) {
+func (q *Queue[T]) Dequeue() (T, bool) {
 	if q.head == nil {
 		var null T
-		return false, null
+		return null, false
 	}
 
 	result := q.head.value
 	q.head = q.head.previous
 
-	return true, result
+	return result, true
 }
