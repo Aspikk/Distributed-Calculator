@@ -1,4 +1,4 @@
-package entities
+package stack
 
 type node[T any] struct {
 	value    T
