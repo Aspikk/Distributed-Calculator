@@ -12,10 +12,6 @@ import (
 	storage "github.com/Aspikk/Distributed-Calculator/internal/storage"
 )
 
-var (
-	id = 1
-)
-
 // Handlers
 
 func AddExpression(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +21,7 @@ func AddExpression(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exp := &expression.Expression{}
+	exp := expression.New()
 	err = json.Unmarshal(body, exp)
 	if err != nil {
 		http.Error(w, "something went wrong... (resolving body)", http.StatusInternalServerError)
@@ -37,12 +33,10 @@ func AddExpression(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exp.SetID(&id)
-	exp.SetStatus("processing")
 	exp.AddTo(storage.DB.Expressions)
 	exp.ToRpn()
 
-	response := fmt.Sprintf("{\"id\": %d}", id-1)
+	response := fmt.Sprintf("{\"id\": %d}", exp.ID)
 	writeResponse(w, http.StatusCreated, []byte(response))
 }
 
