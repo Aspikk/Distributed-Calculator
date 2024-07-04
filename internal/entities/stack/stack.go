@@ -9,7 +9,7 @@ type Stack[T any] struct {
 	top *node[T]
 }
 
-func NewStack[T any]() *Stack[T] {
+func New[T any]() *Stack[T] {
 	return &Stack[T]{
 		top: nil,
 	}
