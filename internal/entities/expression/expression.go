@@ -1,10 +1,13 @@
 package expression
 
 import (
+	"errors"
 	"strings"
 	"unicode"
 
+	queue "github.com/Aspikk/Distributed-Calculator/internal/entities/queue"
 	stack "github.com/Aspikk/Distributed-Calculator/internal/entities/stack"
+	task "github.com/Aspikk/Distributed-Calculator/internal/entities/task"
 )
 
 var (
@@ -74,7 +77,7 @@ func (e *Expression) IsInvalid() bool {
 		return true
 	}
 
-	stack := stack.NewStack[rune]()
+	stack := stack.New[rune]()
 
 	operationCount := 0
 
@@ -83,16 +86,16 @@ func (e *Expression) IsInvalid() bool {
 			continue
 		}
 
-		if !(isStringDigit(string(v)) || isOperation(v) || v == '(' || v == ')') {
+		if !(isStringDigit(string(v)) || isOperation(string(v)) || v == '(' || v == ')') {
 			return true
 		}
 
-		if isOperation(v) {
+		if isOperation(string(v)) {
 			if i == 0 {
 				return true
 			}
 
-			if (i > 0) && (e.Raw[i-1] == '(' || isOperation(rune(e.Raw[i-1]))) {
+			if (i > 0) && (e.Raw[i-1] == '(' || isOperation(string(e.Raw[i-2]))) {
 				return true
 			}
 
@@ -100,10 +103,10 @@ func (e *Expression) IsInvalid() bool {
 		}
 
 		if v == '(' {
-			if i >= 2 && (!isOperation(rune(e.Raw[i-2])) && e.Raw[i-2] != '(') {
+			if i >= 2 && (!isOperation(string(e.Raw[i-2])) && e.Raw[i-2] != '(') {
 				return true
 			}
-			if i+2 < len(e.Raw) && isOperation(rune(e.Raw[i+2])) {
+			if i+2 < len(e.Raw) && isOperation(string(e.Raw[i+2])) {
 				return true
 			}
 			stack.Push(v)
@@ -123,8 +126,8 @@ func (e *Expression) IsInvalid() bool {
 		}
 	}
 
-	lastChar := e.Raw[len(e.Raw)-1]
-	if isOperation(rune(lastChar)) {
+	lastChar := e.Raw[len(e.Raw)-2]
+	if isOperation(string(lastChar)) {
 		return true
 	}
 
@@ -151,7 +154,7 @@ func (e *Expression) ToRpn() {
 		"(": 1,
 	}
 
-	stack := stack.NewStack[string]()
+	stack := stack.New[string]()
 
 	for _, v := range strings.Split(e.Raw, " ") {
 		if isStringDigit(v) {
@@ -197,6 +200,36 @@ func (e *Expression) ToRpn() {
 		e.rpn += val + " "
 		val, is = stack.Pop()
 	}
+
+	e.rpn = strings.Trim(e.rpn, " ")
+}
+
+func (e *Expression) CreateTasks() (*queue.Queue[*task.Task], error) {
+	stack := stack.New[interface{}]()
+	queue := queue.New[*task.Task]()
+
+	for _, v := range strings.Split(e.rpn, " ") {
+		if isOperation(v) {
+			arg1, Ok := stack.Pop()
+			if !Ok {
+				return nil, errors.New("invalid rpn expression")
+			}
+
+			arg2, Ok := stack.Pop()
+			if !Ok {
+				return nil, errors.New("invalid rpn expression")
+			}
+
+			t := task.New(arg1, arg2, v, "10")
+
+			queue.Enqueue(t)
+			stack.Push(t)
+		} else {
+			stack.Push(v)
+		}
+	}
+
+	return queue, nil
 }
 
 // Help functions
@@ -223,6 +256,6 @@ func isStringDigit(s string) bool {
 	return true
 }
 
-func isOperation(v rune) bool {
-	return v == '+' || v == '-' || v == '*' || v == '/' || v == '^'
+func isOperation(v string) bool {
+	return v == "+" || v == "-" || v == "*" || v == "/" || v == "^"
 }
