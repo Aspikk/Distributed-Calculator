@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Aspikk/Distributed-Calculator/internal/handlers"
+	handlers "github.com/Aspikk/Distributed-Calculator/internal/handlers"
 )
 
 type Server struct {
