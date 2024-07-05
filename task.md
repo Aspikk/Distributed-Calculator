@@ -16,7 +16,7 @@ Back-end часть
 - Добавление вычисления арифметического выражения
 
 ```
-curl --location 'localhost/api/v1/calculate' \
+curl --location 'localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
 --data '{
       "expression": <строка с выражение>
@@ -41,7 +41,7 @@ curl --location 'localhost/api/v1/calculate' \
 - Получение списка выражений
 
 ```
-curl --location 'localhost/api/v1/expressions'
+curl --location 'localhost:8080/api/v1/expressions'
 
 
 ```
@@ -74,7 +74,7 @@ curl --location 'localhost/api/v1/expressions'
 * Получение выражения по его идентификатору
 
 ```
-curl --location 'localhost/api/v1/expressions/:id'
+curl --location 'localhost:8080/api/v1/expressions/:id'
 
 ```
 
@@ -102,7 +102,7 @@ curl --location 'localhost/api/v1/expressions/:id'
 - Получение задачи для выполения.
 
 ```
-curl --location 'localhost/internal/task'
+curl --location 'localhost:8080/internal/task'
 
 ```
 
@@ -131,7 +131,7 @@ curl --location 'localhost/internal/task'
 - Прием результата обработки данных.
 
 ```
-curl --location 'localhost/internal/task' \
+curl --location 'localhost:8080/internal/task' \
 --header 'Content-Type: application/json' \
 --data '{
       "id": 1,
@@ -178,7 +178,7 @@ Front-end часть
 - Проект снабжен примерами использования с помощью curl (который покрывает разные сценарии: всё хорошо, ошибки)
 
 ```
-curl --location 'localhost/api/v1/calculate' \
+curl --location 'localhost:8080/api/v1/calculate' \
 --header 'Content-Type: application/json' \
 --data '{
       "expression": "2+2*2"
